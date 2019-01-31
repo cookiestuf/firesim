@@ -1,9 +1,9 @@
 #!/bin/bash
 #default values
-command_file=ref.cmd
+command_file=test.cmd
 t_pwd="/gapbs"
 jsonFlag=false
-input_type=ref
+input_type=test
 verifyFlag=false
 binariesFlag=false
 
@@ -11,28 +11,26 @@ binariesFlag=false
 bootbinary="bbl-vmlinux"
 output="/benchmark/out/"
 root_fs="gapbs.img"
-ini_file="gapbs.ini"
 
 #more default values
+KRON_ARGS=-g10
 SUITE="bc bfs cc cc_sv pr sssp tc ../gapbs.sh"
-workload_file="overlay/ref/gapbs.json"
+workload_file="gapbs.json"
 workload=$(basename $workload_file .json)
-
 function usage
 {
-    echo "usage: gen_run_scripts.sh [--binaries] [--json-ini] [-h] --input [test | graph500 | ref]"
+    echo "usage gen_run_scripts.sh [--binaries] [--json] [-h] --input [test | graph500 | ref] [--verify]"
 }
 
 while test $# -gt 0
 do
     case "$1" in
-         --json-ini)
+         --json)
              jsonFlag=true
              ;;
          --input)
              shift;
              input_type=$1
-             workload_file="overlay/$input_type/gapbs.json"
              command_file=$1.cmd
              ;;
          -h)
@@ -51,9 +49,11 @@ done
 if [ "$input_type" = graph500 ];
 then
     KRON_ARGS=-g20
-elif [ "$input_type" = test ];
+elif [ "$input_type" = ref ];
 then
-    KRON_ARGS=-g10
+    echo "ref currently not supported"
+    exit
+    KRON_ARGS=-g27
 fi
 
 if [ "$binariesFlag" = true ] && [ ! -d overlay/$input_type ];
@@ -64,13 +64,9 @@ then
     CXX=${RISCV}/bin/riscv64-unknown-linux-gnu-g++ CXX_FLAGS+=--static make
     mkdir -p $overlay_dir/benchmark/graphs
     cp $SUITE $overlay_dir/
-    if [ "$input_type" = ref ]; then
-        aws s3 cp s3://gapbs-ref-graphs $overlay_dir/benchmark/graphs --recursive
-    else
-        ./converter $KRON_ARGS -wb $overlay_dir/benchmark/graphs/kron.wsg
-        ./converter $KRON_ARGS -b $overlay_dir/benchmark/graphs/kron.sg
-        ./converter $KRON_ARGS -b $overlay_dir/benchmark/graphs/kronU.sg
-    fi
+    ./converter $KRON_ARGS -wb $overlay_dir/benchmark/graphs/kron.wsg
+    ./converter $KRON_ARGS -b $overlay_dir/benchmark/graphs/kron.sg
+    ./converter $KRON_ARGS -b $overlay_dir/benchmark/graphs/kronU.sg
     cd ..
 fi
 overlay_dir="overlay/$input_type"
@@ -109,18 +105,9 @@ while IFS= read -r command; do
         echo "    }," >> $workload_file
     fi
 done < $command_file
-
 if [ "$jsonFlag" = true ]; then
     echo "$(head -n -1 $workload_file)" > $workload_file
     echo "    }" >> $workload_file
     echo "  ]" >> $workload_file
     echo "}" >> $workload_file
-    if [ "$input_type" = ref ]; then
-        sed -i 's/f1_2xlarges.*/f1_2xlarges=30/' $ini_file
-        sed -i 's/no_net_num.*/no_net_num_nodes=30/' $ini_file
-    else
-        sed -i 's/f1_2xlarges.*/f1_2xlarges=6/' $ini_file
-        sed -i 's/no_net_num.*/no_net_num_nodes=6/' $ini_file
-    fi
-    cp $ini_file overlay/$input_type/
 fi
