@@ -23,17 +23,17 @@ GAP_DIR=gapbs
 spec17_suites = intrate intspeed
 spec17_rootfs_dirs := $(patsubst %, spec17-%, $(spec17-suites))
 
-$(SPECKLE_DIR)/build/overlay/%:
-	cd $(SPECKLE_DIR) && ./gen_binaries.sh --compile --suite $*
+#Default to ref input size for SPEC17
+input=ref
 
-#Default to test input size for SPEC17 and GAPBS
-input=test
+$(SPECKLE_DIR)/build/overlay/%/$(input):
+	cd $(SPECKLE_DIR) && ./gen_binaries.sh --compile --suite $* --input $(input)
 
-spec17-%: spec17-%.json $(SPECKLE_DIR)/build/overlay/%
+spec17-%: spec17-%.json $(SPECKLE_DIR)/build/overlay/%/$(input)
 	mkdir -p $@
 	cp $(BASE_LINUX) $@/bbl-vmlinux
 	python gen-benchmark-rootfs.py -w $< -r -b $(BASE_IMAGE) \
-		-s $(SPECKLE_DIR)/build/overlay/$*
+		-s $(SPECKLE_DIR)/build/overlay/$*/$(input)
 
 $(GAP_DIR)/overlay/$(input):
 	cd $(GAP_DIR) && ./gen_run_scripts.sh --binaries --input $(input)
@@ -94,7 +94,13 @@ check-rtc-linux:
 checksum-test:
 	cd ../../target-design/firechip/tests && make checksum.riscv
 
+ccbench-cache-sweep:
+	cd ccbench-cache-sweep/ccbench/caches && make ARCH=riscv
+	python gen-benchmark-rootfs.py -w $@.json -r -b $(BASE_IMAGE) -s $@/
+
+
 .PHONY: $(spec17_overlays) $(spec17_rootfs_dirs) gapbs fedora-uniform \
 	memcached-thread-imbalance bw-test-one-instance bw-test-two-instances \
 	ping-latency simperf-test simperf-test-latency simperf-test-scale \
-	iperf3 check-rtc check-rtc-linux allpaper checksum-test
+	iperf3 check-rtc check-rtc-linux allpaper checksum-test \
+	ccbench-cache-sweep

@@ -22,7 +22,7 @@ chisel_srcs = $(foreach submodule,$(submodules),$(shell find $(base_dir)/$(submo
 
 common_chisel_args = $(patsubst $(base_dir)/%,%,$(GENERATED_DIR)) $(PROJECT) $(DESIGN) $(TARGET_PROJECT) $(TARGET_CONFIG) $(PLATFORM_PROJECT) $(PLATFORM_CONFIG)
 
-$(VERILOG) $(HEADER): $(chisel_srcs) $(timestamps)
+$(VERILOG) $(HEADER): $(chisel_srcs) $(FIRRTL_JAR)
 	cd $(base_dir) && $(SBT) $(SBT_FLAGS) \
 	"runMain $(PROJECT).Generator midas $(DESIGN) $(patsubst $(base_dir)/%,%,$(dir $@)) $(PLATFORM) $(macro_lib)"
 
@@ -34,7 +34,7 @@ driver_dir = $(firesim_base_dir)/src/main/cc
 DRIVER_H = $(shell find $(driver_dir) -name "*.h")
 DRIVER_CC := $(driver_dir)/midasexamples/Driver.cc
 
-TARGET_CXX_FLAGS := -DDESIGNDRIVERCLASS=$(DESIGN)_t -DDESIGNNAME_$(DESIGN) -I$(driver_dir) -I$(driver_dir)/midasexamples
+TARGET_CXX_FLAGS := -DDESIGNDRIVERCLASS=$(DESIGN)_t -DDESIGNNAME_$(DESIGN) -I$(driver_dir) -I$(driver_dir)/midasexamples -g
 TARGET_LD_FLAGS :=
 
 ##########################

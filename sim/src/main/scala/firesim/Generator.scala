@@ -7,7 +7,7 @@ import chisel3.internal.firrtl.{Circuit, Port}
 
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.devices.debug.DebugIO
-import freechips.rocketchip.util.{HasGeneratorUtilities, ParsedInputNames}
+import freechips.rocketchip.util.{HasGeneratorUtilities, ParsedInputNames, ElaborationArtefacts}
 import freechips.rocketchip.system.DefaultTestSuites._
 import freechips.rocketchip.system.{TestGeneration, RegressionTestSuite}
 import freechips.rocketchip.config.Parameters
@@ -64,6 +64,7 @@ trait HasFireSimGeneratorUtilities extends HasGeneratorUtilities with HasTestSui
       case "FireBoom" => LazyModule(new FireBoom()(params)).module
       case "FireSimNoNIC"  => LazyModule(new FireSimNoNIC()(params)).module
       case "FireBoomNoNIC" => LazyModule(new FireBoomNoNIC()(params)).module
+      case "FireSimSupernode" => new FireSimSupernode()(params)
     }
   }
 
@@ -121,6 +122,24 @@ trait HasFireSimGeneratorUtilities extends HasGeneratorUtilities with HasTestSui
     fw.write(contents)
     fw.close
     f
+  }
+
+  // Capture FPGA-toolflow related verilog defines
+  def generateHostVerilogHeader() {
+    val headerName = "cl_firesim_generated_defines.vh"
+    val requestedFrequency = hostParams(DesiredHostFrequency)
+    val availableFrequenciesMhz = Seq(190, 175, 160, 90, 85, 75)
+    if (!availableFrequenciesMhz.contains(requestedFrequency)) {
+      throw new RuntimeException(s"Requested frequency (${requestedFrequency} MHz) is not available.\nAllowed options: ${availableFrequenciesMhz} MHz")
+    }
+    writeOutputFile(headerName, s"`define SELECTED_FIRESIM_CLOCK ${requestedFrequency}\n")
+  }
+
+  // Output miscellaneous files produced as a side-effect of elaboration
+  def generateArtefacts {
+    ElaborationArtefacts.files.foreach { case (extension, contents) =>
+      writeOutputFile(s"${longName}.${extension}", contents ())
+    }
   }
 }
 
@@ -206,6 +225,8 @@ object FireSimGenerator extends App with HasFireSimGeneratorUtilities {
 
   elaborateAndCompileWithMidas
   generateTestSuiteMakefrags
+  generateHostVerilogHeader
+  generateArtefacts
 }
 
 // A runtime-configuration generation for memory models
