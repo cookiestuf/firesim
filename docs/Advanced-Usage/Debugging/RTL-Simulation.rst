@@ -102,14 +102,21 @@ Run all RISCV-tools assembly and benchmark tests on a verilated simulator.
     make DESIGN=FireSimNoNIC
     make DESIGN=FireSimNoNIC -j run-asm-tests
     make DESIGN=FireSimNoNIC -j run-bmark-tests
+    
+Run all RISCV-tools assembly and benchmark tests on a verilated simulator with waveform dumping.
 
+::
+
+    make DESIGN=FireSimNoNIC verilator-debug
+    make DESIGN=FireSimNoNIC -j run-asm-tests-debug
+    make DESIGN=FireSimNoNIC -j run-bmark-tests-debug
 
 Run rv64ui-p-simple (a single assembly test) on a verilated simulator.
 
 ::
 
     make DESIGN=FireSimNoNIC
-    make $(pwd)/output/f1/FireSimNoNIC-FireSimRocketChipConfig-FireSimConfig/rv64ui-p-simple.out
+    make DESIGN=FireSimNoNIC $(pwd)/output/f1/FireSimNoNIC-FireSimRocketChipConfig-FireSimConfig/rv64ui-p-simple.out
 
 Run rv64ui-p-simple (a single assembly test) on a VCS simulator with waveform dumping.
 
@@ -117,7 +124,7 @@ Run rv64ui-p-simple (a single assembly test) on a VCS simulator with waveform du
 
 
     make DESIGN=FireSimNoNIC vcs-debug
-    make EMUL=vcs $(pwd)/output/f1/FireSimNoNIC-FireSimRocketChipConfig-FireSimConfig/rv64ui-p-simple.vpd
+    make DESIGN=FireSimNoNIC EMUL=vcs $(pwd)/output/f1/FireSimNoNIC-FireSimRocketChipConfig-FireSimConfig/rv64ui-p-simple.vpd
 
 
 FPGA-Level Simulation
@@ -154,6 +161,12 @@ To run a simulation you need to make both the DUT and driver targets by typing:
     make xsim-dut <VCS=1> & # Launch the DUT
     make run-xsim SIM_BINARY=<PATH/TO/BINARY/FOR/TARGET/TO/RUN> # Launch the driver
 
+
+When following this process, you should wait until ``make xsim-dut`` prints
+``opening driver to xsim`` before running ``make run-xsim`` (getting these prints from
+``make xsim-dut`` will take a while). Additionally, you will want to use
+``DESIGN=FireSimNoNIC``, since the XSim scripts included with ``aws-fpga`` do
+not support DMA PCIS.
 
 Once both processes are running, you should see:
 
