@@ -1,7 +1,7 @@
 
-# All the tests in here right now are based off the br-disk image.
-BASE_IMAGE:=../../sw/firesim-software/images/br-disk.img
-BASE_LINUX:=../../sw/firesim-software/images/br-disk-bin
+# All the tests in here right now are based off the br-baseimage.
+BASE_IMAGE:=../../sw/firesim-software/images/br-base.img
+BASE_LINUX:=../../sw/firesim-software/images/br-base-bin
 
 # TODO: ideally we want to restructure this so that:
 # Proprietary benchmarks (e.g. spec) are available as separate disks that can
@@ -36,10 +36,10 @@ spec17-%: spec17-%.json $(SPECKLE_DIR)/build/overlay/%/$(input)
 		-s $(SPECKLE_DIR)/build/overlay/$*/$(input)
 
 #Default to test input size for GAPBS
-gapbs: input = test
+gapbs: input = graph500
 
 $(GAP_DIR)/overlay/$(input):
-	cd $(GAP_DIR) && ./gen_run_scripts.sh --binaries --input $(input) --json-ini
+	cd $(GAP_DIR) && ./gen_run_scripts.sh --binaries --input $(input)
  
 
 gapbs:  gapbs.json $(GAP_DIR)/overlay/$(input) 
@@ -51,8 +51,8 @@ gapbs:  gapbs.json $(GAP_DIR)/overlay/$(input)
 memcached-thread-imbalance:
 	mkdir -p $@
 	sudo yum -y install gengetopt
-	sudo pip install matplotlib
-	sudo pip install pandas
+	sudo pip2 install matplotlib
+	sudo pip2 install pandas
 	cd $@ && git submodule update --init mutilate-loadgen-riscv-release
 	cd $@/mutilate-loadgen-riscv-release && ./build.sh
 	python gen-benchmark-rootfs.py -w $@.json -r -b $(BASE_IMAGE) -s $@/mutilate-loadgen-riscv-release/overlay
@@ -76,6 +76,8 @@ simperf-test:
 simperf-test-scale: simperf-test
 
 simperf-test-latency: simperf-test
+
+flash-stress: simperf-test-latency
 
 iperf3: iperf3.json
 	mkdir -p $@
@@ -104,4 +106,4 @@ ccbench-cache-sweep:
 	memcached-thread-imbalance bw-test-one-instance bw-test-two-instances \
 	ping-latency simperf-test simperf-test-latency simperf-test-scale \
 	iperf3 check-rtc check-rtc-linux allpaper checksum-test \
-	ccbench-cache-sweep
+	ccbench-cache-sweep flash-stress
