@@ -92,6 +92,7 @@ class FireSimRocketChipConfig extends Config(
   new freechips.rocketchip.system.DefaultConfig)
 
 class UnleashedRocketChipConfig extends Config(
+  new WithExtMemSize(0x200000000L) ++ // 8GB
   new WithL1ICacheWays(8) ++
   new WithL1DCacheWays(8) ++
   new FireSimRocketChipConfig)
