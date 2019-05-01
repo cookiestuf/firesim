@@ -188,6 +188,10 @@ class FireSimConfig extends Config(
   new WithTracerVWidget ++
   new BasePlatformConfig)
 
+class UnleashedConfig extends Config(
+  new WithDesiredHostFrequency(1000) ++
+  new FireSimConfig)
+
 class FireSimConfig160MHz extends Config(
   new WithDesiredHostFrequency(160) ++
   new FireSimConfig)

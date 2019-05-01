@@ -91,6 +91,11 @@ class FireSimRocketChipConfig extends Config(
   new WithPerfCounters ++
   new freechips.rocketchip.system.DefaultConfig)
 
+class UnleashedRocketChipConfig extends Config(
+  new WithL1ICacheWays(8) ++
+  new WithL1DCacheWays(8) ++
+  new FireSimRocketChipConfig)
+
 class WithNDuplicatedRocketCores(n: Int) extends Config((site, here, up) => {
   case RocketTilesKey => List.tabulate(n)(i => up(RocketTilesKey).head.copy(hartId = i))
 })
@@ -100,6 +105,9 @@ class FireSimRocketChipTracedConfig extends Config(
 
 // single core config
 class FireSimRocketChipSingleCoreConfig extends Config(new FireSimRocketChipConfig)
+
+// single core Unleashed config
+class UnleashedRocketChipSingleCoreConfig extends Config(new UnleashedRocketChipConfig)
 
 class FireSimRocketChipSingleCoreTracedConfig extends Config(
   new WithTraceRocket ++ new FireSimRocketChipSingleCoreConfig)
