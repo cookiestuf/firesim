@@ -35,7 +35,7 @@ class WithBuildStategy(strategy: BuildStrategies.IsBuildStrategy) extends Config
 
 // Shortened names useful for appending to config strings in Make variables and build recipes
 // example: FireSimConfig_F160MHz is equivalent to: new Config(new F160MHz ++ new FireSimConfig) 
-class F1000MHz extends WithDesiredHostFrequency(1000) // for Unleashed Core
+class F933MHz extends WithDesiredHostFrequency(933) // for Unleashed Core this is the max
 class F190MHz extends WithDesiredHostFrequency(190)
 class F175MHz extends WithDesiredHostFrequency(175)
 class F160MHz extends WithDesiredHostFrequency(160)
