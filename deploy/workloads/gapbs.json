@@ -2,10 +2,11 @@
   "common_bootbinary" : "bbl-vmlinux",
   "benchmark_name" : "gapbs",
   "deliver_dir" : "gapbs",
-  "common_args" : [],
+  "common_args" : ["--counters"],
   "common_files" : ["gapbs.sh"],
   "common_simulation_outputs": ["uartlog", "memory_stats.csv"],
   "common_outputs" : ["/output"],
+  "post_run_hook": "python ~/midas-scripts/hpm_data_parser.py -b ",
   "workloads" : [
     {
       "name": "bc-kron",

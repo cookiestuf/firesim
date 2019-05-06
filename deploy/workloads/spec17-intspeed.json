@@ -2,9 +2,10 @@
   "common_bootbinary" : "bbl-vmlinux",
   "benchmark_name" : "spec17-intspeed",
   "deliver_dir" : "spec17-intspeed",
-  "common_args" : ["--threads 1"],
+  "common_args" : ["--threads 1 --counters"],
   "common_files" : ["intspeed.sh"],
   "common_outputs" : ["/output"],
+  "post_run_hook": "python ~/midas-scripts/hpm_data_parser.py -b ",
   "common_simulation_outputs": ["uartlog"],
   "workloads" : [
     {
