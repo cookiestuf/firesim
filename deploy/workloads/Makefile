@@ -2,6 +2,8 @@
 # All the tests in here right now are based off the br-baseimage.
 BASE_IMAGE:=../../sw/firesim-software/images/br-base.img
 BASE_LINUX:=../../sw/firesim-software/images/br-base-bin
+BASE_LINUX_WITH_CTRS:=../../sw/firesim-software/images/br-ctrs-bin #ctrs enabled in binary
+BASE_IMAGE_WITH_CTRS:=../../sw/firesim-software/images/spec17-intspeed.img #contains start/stop/hpm_counters files
 
 # TODO: ideally we want to restructure this so that:
 # Proprietary benchmarks (e.g. spec) are available as separate disks that can
@@ -31,8 +33,8 @@ $(SPECKLE_DIR)/build/overlay/%/$(input):
 
 spec17-%: spec17-%.json $(SPECKLE_DIR)/build/overlay/%/$(input)
 	mkdir -p $@
-	cp $(BASE_LINUX) $@/bbl-vmlinux
-	python gen-benchmark-rootfs.py -w $< -r -b $(BASE_IMAGE) \
+	cp $(BASE_LINUX_WITH_CTRS) $@/bbl-vmlinux
+	python gen-benchmark-rootfs.py -w $< -r -b $(BASE_IMAGE_WITH_CTRS) \
 		-s $(SPECKLE_DIR)/build/overlay/$*/$(input)
 
 #Default to test input size for GAPBS
@@ -44,8 +46,8 @@ $(GAP_DIR)/overlay/$(input):
 
 gapbs:  gapbs.json $(GAP_DIR)/overlay/$(input) 
 	mkdir -p $@
-	cp $(BASE_LINUX) $@/bbl-vmlinux
-	python gen-benchmark-rootfs.py -w $< -r -b $(BASE_IMAGE) \
+	cp $(BASE_LINUX_WITH_CTRS) $@/bbl-vmlinux
+	python gen-benchmark-rootfs.py -w $< -r -b $(BASE_IMAGE_WITH_CTRS) \
 		-s $(GAP_DIR)/overlay/$(input) \
 
 memcached-thread-imbalance:
