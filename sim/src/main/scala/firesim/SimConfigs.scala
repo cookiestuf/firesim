@@ -84,16 +84,6 @@ class WithLLCModel(maxSets: Int, maxWays: Int) extends Config((site, here, up) =
   ))
 })
 
-// Adds a LLC model with at most <maxSets> sets with <maxWays> ways 
-// and <maxBlockBytes> bytes per block
-class WithLLCModelWithBlocks(maxSets: Int, maxWays: Int, maxBlockBytes: Int) extends Config((site, here, up) => {
-  case LlcKey => Some(LLCParams().copy(
-    ways = WRange(1, maxWays),
-    sets = WRange(1, maxSets),
-    blockBytes = WRange(1, maxBlockBytes)
-  ))
-})
-
 // Changes the default DRAM memory organization.
 class WithDramOrganization(maxRanks: Int, maxBanks: Int, dramSize: BigInt)
     extends Config((site, here, up) => {
@@ -159,18 +149,6 @@ class FCFS16GBQuadRankLLC4MB extends Config(
   new FCFS16GBQuadRank)
 
 // DDR3 - First-Ready FCFS models
-// 8GB models; idk actually
-//class FRFCFS8GBQuadRank(clockDiv: Int = 1) extends Config(
-//  new WithFuncModelLimits(32,32) ++ //do I need to decrease the limits proportionally to the decreased dram space?
-//  new WithDDR3FRFCFS(4, 4) ++
-//  new WithDefaultMemModel(clockDiv)
-//)
-
-class FRFCFS16GBQuadRankLLC2MB extends Config(
-  new WithLLCModelWithBlocks(512, 16, 64) ++
-  new FRFCFS16GBQuadRank
-)
-// 16GB models
 class FRFCFS16GBQuadRank(clockDiv: Int = 1) extends Config(
   new WithFuncModelLimits(32,32) ++
   new WithDDR3FRFCFS(8, 8) ++
@@ -242,14 +220,6 @@ class FireSimDDR3FRFCFSLLC4MBConfig extends Config(
   new WithSimpleNICWidget ++
   new WithBlockDevWidget ++
   new FRFCFS16GBQuadRankLLC4MB ++
-  new BasePlatformConfig)
-
-class FireSimDDR3FRFCFSLLC2MBConfig extends Config(
-  new WithSerialWidget ++
-  new WithUARTWidget ++
-  new WithSimpleNICWidget ++
-  new WithBlockDevWidget ++
-  new FRFCFS16GBQuadRankLLC2MB ++
   new BasePlatformConfig)
 
 class FireSimDDR3FRFCFSLLC4MB3ClockDivConfig extends Config(
